@@ -13,7 +13,7 @@ import scala.concurrent.Future
 case class UUIDTest(id: Int, testId: UUID)
 
 class UUIDTestStoreTable(tag: Tag) extends Table[UUIDTest](tag, "UUIDTest") {
-  implicit def uuidToSt = MappedColumnType.base[UUID, String]({
+  implicit def uuidToString = MappedColumnType.base[UUID, String]({
     x =>
       Logger.info("converting UUID to string " + x + " to " + x.toString)
       x.toString
@@ -25,7 +25,7 @@ class UUIDTestStoreTable(tag: Tag) extends Table[UUIDTest](tag, "UUIDTest") {
 
   def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
-  def testId: Rep[UUID] = column[UUID]("testId", SqlType("VARCHAR(36)"))(uuidToSt)
+  def testId: Rep[UUID] = column[UUID]("testId", SqlType("VARCHAR(36)"))(uuidToString)
 
   def * = (id, testId) <> (UUIDTest.tupled, UUIDTest.unapply)
 }
