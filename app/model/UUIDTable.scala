@@ -3,7 +3,8 @@ package model
 import java.util.UUID
 
 import play.api.Logger
-import slick.jdbc.MySQLProfile.api._
+//import slick.jdbc.MySQLProfile.api._
+import profile.CustomMySqlProfile.api._
 import slick.lifted.Tag
 import slick.sql.SqlProfile.ColumnOption.SqlType
 
@@ -13,19 +14,9 @@ import scala.concurrent.Future
 case class UUIDTest(id: Int, testId: UUID)
 
 class UUIDTestStoreTable(tag: Tag) extends Table[UUIDTest](tag, "UUIDTest") {
-  implicit def uuidToString = MappedColumnType.base[UUID, String]({
-    x =>
-      Logger.info("converting UUID to string " + x + " to " + x.toString)
-      x.toString
-  }, {
-    x =>
-      Logger.info("converting string to UUID " + x + " to " + UUID.fromString(x))
-      UUID.fromString(x)
-  })
-
   def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
-  def testId: Rep[UUID] = column[UUID]("testId", SqlType("VARCHAR(36)"))(uuidToString)
+  def testId = column[UUID]("testId", SqlType("VARCHAR(36)"))
 
   def * = (id, testId) <> (UUIDTest.tupled, UUIDTest.unapply)
 }
