@@ -1,23 +1,11 @@
 package profile
 
+import java.sql.{PreparedStatement, ResultSet}
+
 import slick.ast._
 import slick.jdbc.MySQLProfile
 
 object CustomMySqlProfile  extends MySQLProfile {
-  // this is taken from MySQL profile
-  final case class RowNum(sym: AnonSymbol, inc: Boolean) extends NullaryNode with SimplyTypedNode {
-    type Self = RowNum
-    def buildType = ScalaBaseType.longType
-    def rebuild = copy()
-  }
-
-  final case class RowNumGen(sym: AnonSymbol, init: Long) extends NullaryNode with SimplyTypedNode {
-    type Self = RowNumGen
-    def buildType = ScalaBaseType.longType
-    def rebuild = copy()
-  }
-
-  // this is taken from H2 Profile which treats UUIDs as Strings
   import java.util.UUID
 
   override val columnTypes = new JdbcTypes
@@ -27,6 +15,13 @@ object CustomMySqlProfile  extends MySQLProfile {
       override def sqlTypeName(sym: Option[FieldSymbol]) = "UUID"
       override def valueToSQLLiteral(value: UUID) = "'" + value + "'"
       override def hasLiteralForm = true
+
+      override def setValue(v: UUID, p: PreparedStatement, idx: Int) = p.setString(idx, toString(v))
+      override def getValue(r: ResultSet, idx: Int) = fromString(r.getString(idx))
+      override def updateValue(v: UUID, r: ResultSet, idx: Int) = r.updateString(idx, toString(v))
+
+      private def toString(uuid: UUID) = if(uuid != null) uuid.toString else null
+      private def fromString(uuidString: String) = if(uuidString != null) UUID.fromString(uuidString) else null
     }
   }
 }
